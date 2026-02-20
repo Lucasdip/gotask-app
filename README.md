@@ -1,54 +1,52 @@
-# 🚀 GoTask API | Task Management System
+# ⚔️ Skyrim Quest Log | GoTask API
 
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
 ![Gin Gonic](https://img.shields.io/badge/gin-white?style=for-the-badge&logo=gin)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
-![Render](https://img.shields.io/badge/Render-%46E3B7?style=for-the-badge&logo=render&logoColor=white)
 
-API REST de alto desempenho para gerenciamento de tarefas, construída com foco em segurança, escalabilidade e simplicidade.
+"I used to be an adventurer like you, then I took a Task in the knee." 🏹
+
+Este é um sistema de gerenciamento de missões (Quest Log) inspirado no universo de The Elder Scrolls V: Skyrim. O projeto utiliza uma arquitetura moderna com um **Backend em Go** e um **Frontend SPA imersivo**.
+
+
 
 ---
 
-## 🏗️ Arquitetura do Sistema
+## 📜 Funcionalidades do Pergaminho
 
-
-
-O projeto segue o padrão de responsabilidade única, onde cada pacote tem um papel definido:
-- **Handlers:** Processamento de requisições e respostas JSON.
-- **Models:** Estrutura de dados e comunicação com o Banco via GORM.
-- **Middleware:** Filtro de segurança para validação de tokens JWT.
-
----
-
-## ⚡ Principais Funcionalidades
-
-- [x] **Autenticação Segura:** Login com geração de Token JWT.
-- [x] **CRUD Completo:** Listar, criar, atualizar e deletar tarefas.
-- [x] **Persistência Cloud:** Conectado ao Neon (PostgreSQL) com SSL.
-- [x] **Auto Migration:** O banco de dados se ajusta automaticamente ao iniciar o app.
-- [x] **Segurança de Dados:** Variáveis sensíveis protegidas via `.env`.
+- [x] **Autenticação Dragonborn:** Login seguro com geração de Token JWT.
+- [x] **Quest Log (CRUD):** Adicione novas missões, visualize seu progresso e abandone (delete) quests.
+- [x] **Status de Conclusão:** Marque missões como concluídas com feedback visual (estilo Skyrim).
+- [x] **Interface Imersiva:** Design Single Page Application (SPA) com fontes Cinzel e MedievalSharp.
+- [x] **Persistência em Oblivion:** Banco de dados PostgreSQL hospedado no Neon.tech.
 
 ---
 
-## 📡 API Endpoints
+## 🛡️ Tecnologias Utilizadas
+
+- **Backend:** Golang com Framework Gin Gonic.
+- **ORM:** GORM para interações fluidas com o banco de dados.
+- **Segurança:** Middleware de autenticação JWT e proteção de CORS.
+- **Frontend:** Vanilla JavaScript (Fetch API) e CSS temático (Google Fonts).
+
+---
+
+## 🏗️ Estrutura da API
 
 ### 🔐 Autenticação
-| Método | Rota | Descrição |
-| :--- | :--- | :--- |
-| `POST` | `/login` | Recebe credenciais e retorna o Token de acesso. |
+- `POST /login`: Valida as credenciais e entrega o Token de acesso.
 
-### 📝 Tasks (Requer Header: `Authorization: Bearer <token>`)
-| Método | Rota | Descrição |
-| :--- | :--- | :--- |
-| `GET` | `/tasks` | Retorna todas as tarefas cadastradas. |
-| `POST` | `/tasks` | Cria uma nova tarefa. |
-| `PUT` | `/tasks/:id` | Altera o status ou título de uma tarefa existente. |
-| `DELETE` | `/tasks/:id` | Remove uma tarefa do banco de dados. |
+### 📝 Quests (Necessita de Token no Header)
+- `GET /tasks`: Lista todas as missões do seu diário.
+- `POST /tasks`: Adiciona uma nova missão à sua jornada.
+- `PUT /tasks/:id`: Atualiza o status de conclusão da missão.
+- `DELETE /tasks/:id`: Remove uma missão do pergaminho.
 
 ---
 
-## 🛠️ Como Rodar o Projeto
+## ⚙️ Configuração da sua Jornada
+
 
 1. **Clone o repositório:**
    ```bash
