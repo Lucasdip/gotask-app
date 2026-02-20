@@ -3,6 +3,7 @@ package handlers
 import (
 	"os"
 	"net/http"
+	"gotask-app/models"
 	"time"
 	"github.com/dgrijalva/jwt-go" // ou v5
 	"github.com/gin-gonic/gin"
@@ -10,15 +11,15 @@ import (
 
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
+// Função auxiliar para garantir que a chave nunca esteja vazia
 func getSecretKey() []byte {
-    key := os.Getenv("JWT_SECRET")
-    if key == "" {
-        // Se não achar a chave, o app para aqui com um aviso claro
-        panic("ERRO: A variável de ambiente JWT_SECRET não foi definida!")
-    }
-    return []byte(key)
+	key := os.Getenv("JWT_SECRET")
+	if key == "" {
+		// No Railway, se você esquecer de por a variável, o log vai te avisar
+		panic("ERRO: A variável de ambiente JWT_SECRET não foi definida!")
+	}
+	return []byte(key)
 }
-
 
 func Login(c *gin.Context) {
 	var credentials struct {
@@ -31,22 +32,29 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Login fixo para teste (Depois você pode buscar no banco)
-	if credentials.Username == "admin" && credentials.Password == "1234" {
-		// Criar o Token
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"user": credentials.Username,
-			"exp":  time.Now().Add(time.Hour * 24).Unix(), // Expira em 24h
-		})
+	// --- LÓGICA COM BANCO DE DADOS ---
+	var user models.User
+	// Busca no banco de dados o usuário enviado no JSON
+	result := models.DB.Where("username = ?", credentials.Username).First(&user)
 
-		tokenString, err := token.SignedString(secretKey)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar token"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"token": tokenString})
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Não autorizado"})
+	// Verifica se o usuário existe E se a senha coincide
+	if result.Error != nil || user.Password != credentials.Password {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Nome de herói ou grito de guerra incorretos"})
+		return
 	}
+
+	// --- GERAÇÃO DO TOKEN ---
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user": user.Username,
+		"exp":  time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	// Usamos a função getSecretKey() aqui para garantir que pegamos o valor atualizado
+	tokenString, err := token.SignedString(getSecretKey())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar pergaminho de acesso"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }

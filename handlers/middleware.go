@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"net/http"
+	"os"
 	"strings"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -11,24 +11,29 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token não fornecido"})
-			c.Abort()
+			c.AbortWithStatusJSON(401, gin.H{"error": "Caminho proibido para quem não é Dragonborn"})
 			return
 		}
 
-		// O formato padrão é "Bearer <token>"
-		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+		// Importante: O JS envia "Bearer <token>", temos que separar!
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.AbortWithStatusJSON(401, gin.H{"error": "Formato de pergaminho inválido"})
+			return
+		}
 
+		tokenString := parts[1]
+
+		// Valida o token usando a mesma Secret que você usou no Login
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return secretKey, nil
+			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token inválido ou expirado"})
-			c.Abort()
+			c.AbortWithStatusJSON(401, gin.H{"error": "Este pergaminho expirou ou é falso"})
 			return
 		}
 
-		c.Next() // Prossegue para a rota original
+		c.Next()
 	}
 }

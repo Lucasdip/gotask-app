@@ -19,7 +19,6 @@ func main() {
 	
 	models.InitDB()
 
-
     r := gin.Default()
 	r.StaticFile("/", "./index.html")
 	

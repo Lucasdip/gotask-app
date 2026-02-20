@@ -29,4 +29,8 @@ func InitDB() {
     // No futuro, adicionaremos aqui: database.AutoMigrate(&Credential{}, &Note{})
 
 	DB = database
+	
+	DB.AutoMigrate(&User{}, &Task{}) 
+    
+    fmt.Println("O banco de dados foi sincronizado!")
 }
