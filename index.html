@@ -6,336 +6,297 @@
     <title>Skyrim Quest Log</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
     <style>
-        /* Variáveis CSS para cores do tema */
         :root {
-            --skyrim-gold: #c4ad33;
-            --skyrim-bg: #1a1a1a;
-            --skyrim-panel: #2a2a2a;
-            --skyrim-text: #e0e0e0;
-            --skyrim-red: #8b0000;
+            --skyrim-gold: #c4b07b;
+            --skyrim-iron: #2a2a2a;
+            --skyrim-bg: #0b0c0d;
+            --xp-bar: #4a90e2;
         }
 
         body {
-            background-color: var(--skyrim-bg);
-            background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); /* Textura sutil */
-            color: var(--skyrim-text);
-            font-family: 'MedievalSharp', cursive;
             margin: 0;
+            padding: 0;
+            font-family: 'Cinzel', serif;
+            background: var(--skyrim-bg) url('https://images.alphacoders.com/203/thumb-1920-203543.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #e0e0e0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
         }
 
-        h1, h2 {
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--skyrim-gold);
-            text-shadow: 2px 2px 4px #000;
-            margin-bottom: 20px;
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
         }
 
-        .quest-log-container {
+        .container {
             width: 90%;
-            max-width: 600px;
-            background: rgba(42, 42, 42, 0.9);
-            border: 2px solid #444;
-            border-image: linear-gradient(to bottom, #888, #222) 1;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            max-width: 500px;
+            background: rgba(20, 20, 20, 0.92);
+            border: 2px solid var(--skyrim-gold);
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0,0,0,1);
+            border-radius: 2px;
+        }
+
+        h1, h2 { text-align: center; color: var(--skyrim-gold); text-transform: uppercase; letter-spacing: 2px; margin-top: 0; }
+
+        /* Stats do Jogador */
+        .player-stats {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border: 1px solid rgba(196, 176, 123, 0.3);
             margin-bottom: 20px;
+            position: relative;
+        }
+
+        .user-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+        .hero-name { color: white; font-size: 1.1em; text-shadow: 1px 1px 2px black; }
+        .rank-title { color: var(--skyrim-gold); font-weight: bold; font-size: 1em; }
+        
+        .xp-container {
+            width: 100%;
+            height: 12px;
+            background: #111;
+            border: 1px solid #444;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        #xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e3c72, var(--xp-bar));
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            box-shadow: 0 0 10px var(--xp-bar);
         }
 
         /* Inputs e Botões */
-        input[type="text"], input[type="password"] {
+        input {
             width: 100%;
-            background: #111;
-            border: 1px solid #555;
-            color: #fff;
-            padding: 10px;
-            font-family: 'MedievalSharp';
-            margin-bottom: 10px;
+            padding: 12px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: white;
+            box-sizing: border-box;
+            font-family: 'MedievalSharp', cursive;
         }
 
         button {
-            background: transparent;
-            color: var(--skyrim-gold);
-            border: 1px solid var(--skyrim-gold);
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-            font-family: 'Cinzel', serif;
-            font-size: 0.9em;
-        }
-
-        button:hover {
-            background: var(--skyrim-gold);
-            color: #000;
-            box-shadow: 0 0 10px var(--skyrim-gold);
-        }
-
-        .btn-red {
-            color: var(--skyrim-red);
-            border-color: var(--skyrim-red);
-        }
-        .btn-red:hover {
-            background: var(--skyrim-red);
-            color: #fff;
-            box-shadow: 0 0 10px var(--skyrim-red);
-        }
-
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 0.8em;
-        }
-
-        /* Seção de Login */
-        #login-section h2 {
-            text-align: center;
-        }
-        #login-section button {
             width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--skyrim-gold);
+            color: var(--skyrim-gold);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: 0.3s;
+            font-family: 'Cinzel', serif;
         }
 
-        /* Seção de Tasks */
-        #task-section {
-            display: none; /* Escondido por padrão, JavaScript mostra */
-        }
-        .header-task-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px;
-        }
-        .user-info {
-            font-size: 0.9em;
-            color: #aaa;
-        }
-        .add-task-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-        .add-task-group input {
-            flex-grow: 1;
-            margin-bottom: 0;
-        }
+        button:hover { background: var(--skyrim-gold); color: black; }
 
-        /* Lista de Tarefas */
+        /* Lista de Quests */
+        ul { list-style: none; padding: 0; margin-top: 20px; }
+        
         .task-item {
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 10px;
+            padding: 12px;
+            border-left: 3px solid var(--skyrim-gold);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            border-left: 3px solid transparent;
-            transition: 0.2s;
-            border-bottom: 1px solid #333;
-            background: rgba(0,0,0,0.1);
-            margin-bottom: 5px;
+            transition: 0.3s;
         }
-        .task-item:hover {
-            border-left: 3px solid var(--skyrim-gold);
-            background: rgba(255,255,255,0.05);
+
+        .task-content { display: flex; align-items: center; gap: 15px; cursor: pointer; flex-grow: 1; }
+        .check-box { 
+            width: 20px; height: 20px; border: 1px solid var(--skyrim-gold); 
+            display: flex; align-items: center; justify-content: center; font-size: 0.8em;
         }
-        .task-item.completed {
-            border-left-color: #006400; /* Verde escuro para concluídas */
-        }
-        .task-title {
-            font-size: 1.2rem;
-            cursor: pointer; /* Para marcar como concluída */
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        .task-title.done {
-            text-decoration: line-through;
-            color: #666;
-        }
-        .task-actions {
-            display: flex;
-            gap: 5px;
-        }
+
+        .task-item.completed { border-left-color: #4CAF50; background: rgba(76, 175, 80, 0.05); }
+        .task-item.completed .task-text { text-decoration: line-through; color: #888; }
+        .task-item.completed .check-box { background: var(--skyrim-gold); color: black; }
+
+        .btn-delete { width: auto; padding: 5px 12px; border-color: #ff4444; color: #ff4444; margin-left: 10px; }
+        .btn-delete:hover { background: #ff4444; color: white; }
+
+        #login-error { color: #ff4444; font-size: 0.9em; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h1>Skyrim Quest Log</h1>
+    <div class="overlay"></div>
 
-    <div class="quest-log-container">
+    <div class="container">
         <div id="login-section">
-            <h2>Enter the Elder Scrolls</h2>
-            <input type="text" id="username" placeholder="Dragonborn Name">
-            <input type="password" id="password" placeholder="Shout Password">
-            <button onclick="login()">Login</button>
-            <p id="login-error" style="color: var(--skyrim-red); text-align: center; margin-top: 10px;"></p>
+            <h1>Skyrim Quest Log</h1>
+            <input type="text" id="username" placeholder="Nome do Herói">
+            <input type="password" id="password" placeholder="Grito de Guerra (Senha)">
+            <button onclick="login()">Entrar no Reino</button>
+            <p id="login-error"></p>
         </div>
 
-        <div id="task-section">
-            <div class="header-task-section">
-                <h2>Your Quests</h2>
-                <div class="user-info">
-                    <span>Logged in as: <strong id="logged-in-user">Guest</strong></span>
-                    <button onclick="logout()" class="btn-small btn-red" style="margin-left: 10px;">Logout</button>
+        <div id="task-section" style="display: none;">
+            <div class="player-stats">
+                <div class="user-header">
+                    <span class="hero-name" id="display-username">Dovahkiin</span>
+                    <span id="user-rank" class="rank-title">Prisioneiro</span>
+                </div>
+                <div style="font-size: 0.8em; color: #aaa;">Nível: <span id="user-level" style="color: white;">1</span></div>
+                <div class="xp-container">
+                    <div id="xp-fill"></div>
                 </div>
             </div>
 
-            <div class="add-task-group">
-                <input type="text" id="task-title" placeholder="New Quest Title...">
-                <button onclick="createTask()">Add Quest</button>
+            <h2>Diário de Quests</h2>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="task-title" placeholder="Nova Missão...">
+                <button onclick="createTask()" style="width: 60px;">+</button>
             </div>
 
-            <ul id="task-list">
-                </ul>
+            <ul id="task-list"></ul>
+            <button onclick="logout()" style="margin-top: 20px; border-color: #555; color: #888; font-size: 0.8em;">Abandonar Partida</button>
         </div>
     </div>
 
     <script>
-        // Configurações Globais
-const API_URL = ""; 
-let token = localStorage.getItem("token");
-let currentUsername = localStorage.getItem("username");
+        const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") 
+                ? "http://localhost:8080" 
+                : window.location.origin;
 
-// --- Inicialização ---
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sistema iniciado. Token atual:", token);
-    if (token && currentUsername) {
-        showTasksSection(currentUsername);
-    } else {
-        showLoginSection();
-    }
-});
+        let token = localStorage.getItem("token");
 
-// --- Controle de Interface (O "Redirecionamento" SPA) ---
-function showLoginSection() {
-    document.getElementById("login-section").style.display = 'block';
-    document.getElementById("task-section").style.display = 'none';
-}
-
-function showTasksSection(username) {
-    console.log("Trocando para tela de tarefas...");
-    document.getElementById("login-section").style.display = 'none';
-    document.getElementById("task-section").style.display = 'block';
-    document.getElementById("logged-in-user").innerText = username;
-    loadTasks();
-}
-
-// --- Lógica de Autenticação ---
-async function login() {
-    const usernameInput = document.getElementById("username").value;
-    const passwordInput = document.getElementById("password").value;
-    const errorDisplay = document.getElementById("login-error");
-
-    errorDisplay.innerText = ""; 
-
-    try {
-        const res = await fetch(`${API_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: usernameInput, password: passwordInput })
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            console.log("Resposta da API:", data);
-            
-            // Tenta capturar o token independente da capitalização (Token ou token)
-            token = data.token || data.Token; 
-
-            if (!token) {
-                errorDisplay.innerText = "Erro: Token não recebido do servidor.";
-                console.error("Campo 'token' ausente no JSON de resposta.");
-                return;
+        document.addEventListener('DOMContentLoaded', () => {
+            if (token) {
+                loadTasks();
             }
+        });
 
-            localStorage.setItem("token", token);
-            localStorage.setItem("username", usernameInput);
-            
-            showTasksSection(usernameInput);
-        } else {
-            errorDisplay.innerText = data.error || "Credenciais inválidas, Dragonborn.";
+        async function login() {
+            const u = document.getElementById("username").value;
+            const p = document.getElementById("password").value;
+            const err = document.getElementById("login-error");
+
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("username", u); // Salva o nome para exibir depois
+                    token = data.token;
+                    loadTasks();
+                } else {
+                    err.innerText = data.error || "Credenciais inválidas.";
+                }
+            } catch (e) {
+                err.innerText = "O servidor não respondeu. Verifique sua conexão.";
+            }
         }
-    } catch (error) {
-        errorDisplay.innerText = "Falha na conexão com o servidor.";
-        console.error("Erro de rede:", error);
-    }
-}
 
-function logout() {
-    localStorage.clear();
-    location.reload(); // Recarrega para limpar todos os estados
-}
+        async function loadTasks() {
+            try {
+                const res = await fetch(`${API_URL}/tasks/`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
 
-// --- Lógica de Quests (CRUD) ---
-async function loadTasks() {
-    try {
-        const res = await fetch(`${API_URL}/tasks/`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+                if (res.status === 401) return logout();
 
-        if (res.status === 401) return logout();
+                const data = await res.json();
+                
+                document.getElementById("login-section").style.display = 'none';
+                document.getElementById("task-section").style.display = 'block';
 
-        const tasks = await res.json();
-        const taskList = document.getElementById("task-list");
-        taskList.innerHTML = ""; 
+                // Atualiza Interface com dados do Usuário
+                if (data.user) {
+                    document.getElementById("display-username").innerText = localStorage.getItem("username");
+                    document.getElementById("user-level").innerText = data.user.level;
+                    document.getElementById("user-rank").innerText = data.user.rank;
+                    document.getElementById("xp-fill").style.width = data.user.xp + "%";
+                }
 
-        tasks.forEach(t => {
-            const listItem = document.createElement('li');
-            listItem.className = `task-item ${t.done ? 'completed' : ''}`;
-            listItem.innerHTML = `
-                <span class="task-title ${t.done ? 'done' : ''}" onclick="toggleTaskStatus(${t.ID}, ${t.done})">
-                    ${t.title}
-                </span>
-                <div class="task-actions">
-                    <button onclick="deleteTask(${t.ID})" class="btn-small btn-red">X</button>
-                </div>
-            `;
-            taskList.appendChild(listItem);
-        });
-    } catch (error) {
-        console.error("Erro ao carregar tarefas:", error);
-    }
-}
+                // Renderiza Lista de Tasks
+                const list = document.getElementById("task-list");
+                list.innerHTML = "";
+                
+                // Note: Verifique se seu Go retorna "tasks" ou "Tasks" (depende da struct/JSON tags)
+                const tasks = data.tasks || [];
+                
+                tasks.forEach(t => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${t.done ? 'completed' : ''}`;
+                    li.innerHTML = `
+                        <div class="task-content" onclick="toggleTask(${t.ID}, ${t.done})">
+                            <div class="check-box">${t.done ? '✔' : ''}</div>
+                            <span class="task-text">${t.title}</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteTask(${t.ID})">X</button>
+                    `;
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                console.error("Erro ao carregar quests:", e);
+            }
+        }
 
-async function createTask() {
-    const titleInput = document.getElementById("task-title");
-    if (!titleInput.value) return;
+        async function createTask() {
+            const input = document.getElementById("task-title");
+            if (!input.value) return;
+            try {
+                await fetch(`${API_URL}/tasks/`, {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ title: input.value, done: false })
+                });
+                input.value = "";
+                loadTasks();
+            } catch (e) { console.error(e); }
+        }
 
-    await fetch(`${API_URL}/tasks/`, {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` 
-        },
-        body: JSON.stringify({ title: titleInput.value, done: false })
-    });
-    titleInput.value = "";
-    loadTasks();
-}
+        async function toggleTask(id, currentStatus) {
+            try {
+                await fetch(`${API_URL}/tasks/${id}`, {
+                    method: "PUT",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ done: !currentStatus })
+                });
+                loadTasks(); 
+            } catch (e) { console.error(e); }
+        }
 
-async function deleteTask(id) {
-    if (!confirm("Abandonar esta quest?")) return;
-    await fetch(`${API_URL}/tasks/${id}`, {
-        method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
-    });
-    loadTasks();
-}
+        async function deleteTask(id) {
+            if(!confirm("Deseja realmente abandonar esta quest?")) return;
+            try {
+                await fetch(`${API_URL}/tasks/${id}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                loadTasks();
+            } catch (e) { console.error(e); }
+        }
 
-async function toggleTaskStatus(id, currentStatus) {
-    await fetch(`${API_URL}/tasks/${id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ done: !currentStatus })
-    });
-    loadTasks();
-}
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
     </script>
 </body>
 </html>
