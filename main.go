@@ -21,6 +21,7 @@ func main() {
 
 
     r := gin.Default()
+	r.StaticFile("/", "./index.html")
 	
 	r.Use(func(c *gin.Context) {
     c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
