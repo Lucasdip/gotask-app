@@ -54,3 +54,5 @@ Este é um sistema de gerenciamento de missões (Quest Log) inspirado no univers
 
 👤 Autor
 Desenvolvido por [Lucas Lima] – Sinta-se à vontade para entrar em contato!
+
+Link do Projeto no ar - https://gotask-app.onrender.com/
