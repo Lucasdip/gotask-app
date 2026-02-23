@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skyrim Quest & Inventory Log</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --skyrim-gold: #c4ad33;
@@ -28,7 +30,91 @@
             align-items: center;
         }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: -1; }
+        .main-layout {
+            display: flex;
+            gap: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 85vh;
+            /* Altura fixa para scroll interno */
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 15, 15, 0.98);
+            border-right: 2px solid var(--skyrim-gold);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            border-bottom: 1px solid rgba(196, 173, 51, 0.3);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .nav-btn {
+            text-align: left;
+            background: transparent;
+            border: none;
+            border-left: 0px solid var(--skyrim-gold);
+            padding: 12px 15px;
+            font-size: 0.9em;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background: rgba(196, 173, 51, 0.1);
+            border-left: 4px solid var(--skyrim-gold);
+            color: var(--skyrim-gold);
+            padding-left: 20px;
+        }
+
+        .nav-btn.logout {
+            border-color: var(--skyrim-red);
+            color: #888;
+        }
+
+        .nav-btn.logout:hover {
+            color: var(--skyrim-red);
+            background: rgba(139, 0, 0, 0.1);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Esconde as seções que não estão ativas */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
 
         .container {
             width: 95%;
@@ -36,10 +122,17 @@
             background: var(--skyrim-panel);
             border: 2px solid var(--skyrim-gold);
             padding: 25px;
-            box-shadow: 0 0 30px rgba(0,0,0,1);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1);
         }
 
-        h1, h2, h3 { color: var(--skyrim-gold); text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+        h1,
+        h2,
+        h3 {
+            color: var(--skyrim-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
 
         /* Estatísticas do Personagem */
         .player-stats {
@@ -53,22 +146,52 @@
         }
 
         .avatar-frame {
-            width: 70px; height: 70px; border: 2px solid var(--skyrim-gold);
-            border-radius: 50%; overflow: hidden; background: #000;
+            width: 70px;
+            height: 70px;
+            border: 2px solid var(--skyrim-gold);
+            border-radius: 50%;
+            overflow: hidden;
+            background: #000;
         }
 
-        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-        .xp-container { width: 100%; height: 12px; background: #111; border: 1px solid #444; margin-top: 8px; }
-        #xp-fill { height: 100%; background: var(--xp-bar); width: 0%; transition: 0.6s; box-shadow: 0 0 10px var(--xp-bar); }
+        .xp-container {
+            width: 100%;
+            height: 12px;
+            background: #111;
+            border: 1px solid #444;
+            margin-top: 8px;
+        }
+
+        #xp-fill {
+            height: 100%;
+            background: var(--xp-bar);
+            width: 0%;
+            transition: 0.6s;
+            box-shadow: 0 0 10px var(--xp-bar);
+        }
 
         /* Layout em Grade para o Dashboard */
-        .dashboard-layout { display: grid; grid-template-columns: 1fr 320px; gap: 30px; }
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+        }
 
         /* Estilo de Quests e Finanças */
-        .quest-log, .finance-sidebar { display: flex; flex-direction: column; }
+        .quest-log,
+        .finance-sidebar {
+            display: flex;
+            flex-direction: column;
+        }
 
-        .task-item, .finance-item {
+        .task-item,
+        .finance-item {
             background: rgba(255, 255, 255, 0.03);
             padding: 12px;
             margin-bottom: 8px;
@@ -78,116 +201,165 @@
             align-items: center;
         }
 
-        .task-item.completed { border-left-color: #4CAF50; opacity: 0.6; }
-        .task-text.done { text-decoration: line-through; }
+        .task-item.completed {
+            border-left-color: #4CAF50;
+            opacity: 0.6;
+        }
+
+        .task-text.done {
+            text-decoration: line-through;
+        }
 
         /* Formulários e Botões */
-        input, select {
-            background: #111; border: 1px solid #555; color: #fff;
-            padding: 10px; font-family: 'MedievalSharp'; margin-bottom: 5px; width: 100%; box-sizing: border-box;
+        input,
+        select {
+            background: #111;
+            border: 1px solid #555;
+            color: #fff;
+            padding: 10px;
+            font-family: 'MedievalSharp';
+            margin-bottom: 5px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         button {
-            background: transparent; color: var(--skyrim-gold); border: 1px solid var(--skyrim-gold);
-            padding: 10px; cursor: pointer; text-transform: uppercase; font-family: 'Cinzel'; transition: 0.3s;
+            background: transparent;
+            color: var(--skyrim-gold);
+            border: 1px solid var(--skyrim-gold);
+            padding: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: 'Cinzel';
+            transition: 0.3s;
         }
 
-        button:hover { background: var(--skyrim-gold); color: #000; }
+        button:hover {
+            background: var(--skyrim-gold);
+            color: #000;
+        }
 
         .gold-status {
-            font-size: 1.4em; color: #ffd700; text-align: center;
-            padding: 15px; border: 1px dotted var(--skyrim-gold); margin-bottom: 15px;
+            font-size: 1.4em;
+            color: #ffd700;
+            text-align: center;
+            padding: 15px;
+            border: 1px dotted var(--skyrim-gold);
+            margin-bottom: 15px;
         }
 
         /* Container Principal em Grid */
-.rpg-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
-    gap: 30px;
-    margin-top: 20px;
-}
+        .rpg-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            /* Duas colunas iguais */
+            gap: 30px;
+            margin-top: 20px;
+        }
 
-.panel {
-    background: rgba(30, 30, 30, 0.7);
-    border: 1px solid var(--skyrim-gold);
-    padding: 20px;
-    border-radius: 4px;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
-    min-height: 400px;
-}
+        .panel {
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid var(--skyrim-gold);
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            min-height: 400px;
+        }
 
-/* Ajustes de Input para ficarem elegantes no grid */
-.input-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+        /* Ajustes de Input para ficarem elegantes no grid */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-.input-group input { flex: 1; }
+        .input-group input {
+            flex: 1;
+        }
 
-.input-group-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+        .input-group-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
 
-/* Estilização do Saldo (Ouro) */
-#balance-container {
-    font-size: 1.5rem;
-    color: var(--skyrim-gold);
-    text-align: center;
-    margin: 15px 0;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px #000;
-}
+        /* Estilização do Saldo (Ouro) */
+        #balance-container {
+            font-size: 1.5rem;
+            color: var(--skyrim-gold);
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
 
-/* Listas com Scroll Personalizado */
-.rpg-list {
-    list-style: none;
-    padding: 0;
-    max-height: 300px;
-    overflow-y: auto;
-}
+        /* Listas com Scroll Personalizado */
+        .rpg-list {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
 
-/* Quando a quest está pronta, ela ganha uma borda verde e fica opaca */
-.task-item.completed { 
-    border-left-color: #4CAF50 !important; 
-    opacity: 0.6; 
-    background: rgba(20, 40, 20, 0.4);
-}
+        /* Quando a quest está pronta, ela ganha uma borda verde e fica opaca */
+        .task-item.completed {
+            border-left-color: #4CAF50 !important;
+            opacity: 0.6;
+            background: rgba(20, 40, 20, 0.4);
+        }
 
-/* O texto riscado */
-.task-text.done { 
-    text-decoration: line-through; 
-    color: #888; 
-}
+        /* O texto riscado */
+        .task-text.done {
+            text-decoration: line-through;
+            color: #888;
+        }
 
-/* Cursor de "mãozinha" para saber que é clicável */
-.task-text {
-    cursor: pointer;
-    flex: 1;
-}
+        /* Cursor de "mãozinha" para saber que é clicável */
+        .task-text {
+            cursor: pointer;
+            flex: 1;
+        }
 
-/* Scrollbar com cara de antigo */
-.rpg-list::-webkit-scrollbar { width: 5px; }
-.rpg-list::-webkit-scrollbar-track { background: #1a1a1a; }
-.rpg-list::-webkit-scrollbar-thumb { background: var(--skyrim-gold); }
+        /* Scrollbar com cara de antigo */
+        .rpg-list::-webkit-scrollbar {
+            width: 5px;
+        }
 
-/* Responsividade: No celular, as colunas ficam uma embaixo da outra */
-@media (max-width: 600px) {
-    .rpg-grid { grid-template-columns: 1fr; }
-}
+        .rpg-list::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
 
-        .income { color: #4CAF50; }
-        .expense { color: #ff4444; }
-        #login-section { max-width: 400px; margin: auto; }
+        .rpg-list::-webkit-scrollbar-thumb {
+            background: var(--skyrim-gold);
+        }
+
+        /* Responsividade: No celular, as colunas ficam uma embaixo da outra */
+        @media (max-width: 600px) {
+            .rpg-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .income {
+            color: #4CAF50;
+        }
+
+        .expense {
+            color: #ff4444;
+        }
+
+        #login-section {
+            max-width: 400px;
+            margin: auto;
+        }
     </style>
 </head>
+
 <body>
     <div class="overlay"></div>
 
-    <div class="container">
-        <div id="login-section">
+    <div class="container" id="main-container">
+        <div id="login-section" class="screen active">
             <h1>Skyrim Log</h1>
             <input type="text" id="username" placeholder="Nome do Herói">
             <input type="password" id="password" placeholder="Senha">
@@ -195,80 +367,131 @@
             <p id="login-error" style="color: red; text-align: center;"></p>
         </div>
 
-        <div id="welcome-screen" style="display: none; text-align: center;">
+        <div id="welcome-screen" class="screen" style="text-align: center;">
             <h1>Saudações, <span id="welcome-hero" style="color: var(--skyrim-gold);"></span></h1>
             <p>O diário de aventuras e o inventário de ouro aguardam.</p>
             <button onclick="showDashboard()" style="margin-top: 20px; padding: 15px 40px;">Abrir Painel</button>
         </div>
 
-        <div id="dashboard-screen" style="display: none;">
-            <div class="player-stats">
-                <div class="avatar-frame">
-                    <img id="user-avatar" src="" class="avatar-img">
+        <div id="dashboard-wrapper" style="display: none;" class="main-layout">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="avatar-frame">
+                        <img id="user-avatar" src="" class="avatar-img">
+                    </div>
+                    <h2 id="display-username" style="font-size: 1.2em; margin: 10px 0;">Dragonborn</h2>
+                    <p id="user-rank" style="font-size: 0.8em; color: var(--skyrim-gold);">Prisioneiro</p>
                 </div>
-                <div style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span id="display-username" style="color: var(--skyrim-gold); font-weight: bold;"></span>
-                        <span>Nível: <span id="user-level">1</span> - <span id="user-rank">Prisioneiro</span></span>
+
+                <nav class="sidebar-nav">
+                    <button onclick="showSection('dashboard-screen')" class="nav-btn active">
+                        Painel Geral
+                    </button>
+                    <button onclick="showSection('quest-section')" class="nav-btn">
+                        Diário de Quests
+                    </button>
+                    <button onclick="showSection('finance-section')" class="nav-btn">
+                        Cofre
+                    </button>
+                    <button onclick="logout()" class="nav-btn logout" style="margin-top: auto;">
+                        Sair do Reino
+                    </button>
+                </nav>
+
+                <div class="sidebar-footer" style="padding: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 5px;">
+                        <span>Nível <span id="user-level">1</span></span>
+                        <span>XP</span>
                     </div>
                     <div class="xp-container">
                         <div id="xp-fill"></div>
                     </div>
                 </div>
-                <button onclick="logout()" style="font-size: 0.7em; margin-left: 10px;">Sair</button>
-            </div>
+            </aside>
 
-            <div class="rpg-grid">
-                <div class="panel quest-panel">
-                    <h3>Diário de Missões</h3>
-                    <div class="input-group">
-                        <input type="text" id="task-input" placeholder="Nova quest...">
-                        <button onclick="createTask()">Aceitar</button>
+            <main class="content-area">
+                <div id="dashboard-screen" class="screen active">
+                    <div class="rpg-grid">
+                        <div class="panel">
+                            <h3>Minhas Quests</h3>
+                            <ul id="task-list-mini" class="rpg-list"></ul>
+                        </div>
+                        <div class="panel">
+                            <h3>Saldo Atual</h3>
+                            <div id="balance-container" style="font-size: 2em;">0G</div>
+                        </div>
                     </div>
-                    <ul id="task-list" class="rpg-list"></ul>
                 </div>
 
-                <div class="panel finance-panel">
-                    <h3>Cofre de Whiterun</h3>
-                    <div class="input-group-vertical">
-                        <input type="text" id="fin-desc" placeholder="Origem do ouro...">
-                        <input type="number" id="fin-amount" placeholder="Quantidade">
-                        <select id="fin-type">
-                            <option value="receita">Saque (+)</option>
-                            <option value="despesa">Tributo (-)</option>
-                        </select>
-                        <button onclick="addTransaction()" class="btn-full">Registrar</button>
+                <div id="quest-section" class="screen">
+                    <div class="panel">
+                        <h3>Gerenciar Missões</h3>
+                        <div class="input-group">
+                            <input type="text" id="task-input" placeholder="Nova quest...">
+                            <button onclick="createTask()">Aceitar</button>
+                        </div>
+                        <ul id="task-list" class="rpg-list"></ul>
                     </div>
-                    <div id="balance-container">
-                        Saldo: <span id="total-balance">0</span>G
-                    </div>
-                    <ul id="finance-list" class="rpg-list"></ul>
                 </div>
-            </div>
+
+                <div id="finance-section" class="screen">
+                    <div class="panel">
+                        <h3>Tesouraria</h3>
+                        <div class="input-group-vertical">
+                            <input type="text" id="fin-desc" placeholder="Origem do ouro...">
+                            <input type="number" id="fin-amount" placeholder="Quantidade">
+                            <select id="fin-type">
+                                <option value="receita">Saque (+)</option>
+                                <option value="despesa">Tributo (-)</option>
+                            </select>
+                            <button onclick="addTransaction()" style="width: 100%;">Registrar</button>
+                        </div>
+                        <ul id="finance-list" class="rpg-list" style="margin-top: 20px;"></ul>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
     <script>
         const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-        ? "http://localhost:8080"      // Contexto Local
-        : window.location.origin;     // Contexto de Produção (Monolito)
+            ? "http://localhost:8080" : window.location.origin;
 
-let token = localStorage.getItem("token");
+        let token = localStorage.getItem("token");
+
         document.addEventListener('DOMContentLoaded', () => {
-            if (token) showWelcome(localStorage.getItem("username"));
+            if (token) {
+                showWelcome(localStorage.getItem("username"));
+            }
         });
 
+        function showSection(sectionId) {
+            // Esconde todas as telas dentro da content-area
+            document.querySelectorAll('.content-area .screen').forEach(s => s.classList.remove('active'));
+            // Remove active de todos os botões
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            // Mostra a selecionada
+            document.getElementById(sectionId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
         function showWelcome(username) {
-            document.getElementById("login-section").style.display = 'none';
-            document.getElementById("dashboard-screen").style.display = 'none'; // Garante que o dash tá fechado
+            hideAll();
             document.getElementById("welcome-screen").style.display = 'block';
             document.getElementById("welcome-hero").innerText = username;
         }
 
         function showDashboard() {
-            document.getElementById("welcome-screen").style.display = 'none';
-            document.getElementById("dashboard-screen").style.display = 'block';
+            hideAll();
+            document.getElementById("dashboard-wrapper").style.display = 'flex';
             loadAll();
+        }
+
+        function hideAll() {
+            document.getElementById("login-section").style.display = 'none';
+            document.getElementById("welcome-screen").style.display = 'none';
+            document.getElementById("dashboard-wrapper").style.display = 'none';
         }
 
         async function login() {
@@ -290,7 +513,7 @@ let token = localStorage.getItem("token");
                     document.getElementById("login-error").innerText = data.error;
                 }
             } catch (e) {
-                document.getElementById("login-error").innerText = "Reino inacessível (Servidor Offline)";
+                document.getElementById("login-error").innerText = "Servidor Offline";
             }
         }
 
@@ -303,7 +526,7 @@ let token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/tasks`, { headers: { "Authorization": `Bearer ${token}` } });
             if (res.status === 401) return logout();
             const data = await res.json();
-            
+
             if (data.user) {
                 document.getElementById("display-username").innerText = localStorage.getItem("username");
                 document.getElementById("user-level").innerText = data.user.level;
@@ -313,28 +536,57 @@ let token = localStorage.getItem("token");
             }
 
             const list = document.getElementById("task-list");
+            const listMini = document.getElementById("task-list-mini");
             list.innerHTML = "";
-            (data.tasks || []).forEach(t => {
-                const li = document.createElement('li');
-                li.className = `task-item ${t.done ? 'completed' : ''}`;
-                
-                // Criamos um elemento de "checkbox" estilizado (Pergaminho ou Check)
-                const statusIcon = t.done ? "✅" : "📜";
+            listMini.innerHTML = "";
 
-                li.innerHTML = `
+            (data.tasks || []).forEach(t => {
+                const statusIcon = t.done ? "✅" : "📜";
+                const liContent = `
                     <div style="display: flex; align-items: center; flex: 1; cursor: pointer;" onclick="toggleTask(${t.ID}, ${t.done})">
-                        <span style="margin-right: 15px; font-size: 1.2em;">${statusIcon}</span>
+                        <span style="margin-right: 15px;">${statusIcon}</span>
                         <span class="task-text ${t.done ? 'done' : ''}">${t.title}</span>
                     </div>
-                    <button onclick="deleteTask(${t.ID})" style="border-color:var(--skyrim-red); color:var(--skyrim-red); padding: 2px 8px; font-size: 0.7em;">Banir</button>
+                    <button onclick="deleteTask(${t.ID})" style="border-color:red; color:red; padding: 2px 8px; font-size: 0.7em;">X</button>
+                `;
+                
+                const li = document.createElement('li');
+                li.className = `task-item ${t.done ? 'completed' : ''}`;
+                li.innerHTML = liContent;
+                list.appendChild(li);
+
+                const li2 = li.cloneNode(true); // Para o painel geral
+                listMini.appendChild(li2);
+            });
+        }
+
+        async function loadFinance() {
+            const res = await fetch(`${API_URL}/finance`, { headers: { "Authorization": `Bearer ${token}` } });
+            const transactions = await res.json();
+            const list = document.getElementById("finance-list");
+            list.innerHTML = "";
+            let total = 0;
+
+            transactions.forEach(t => {
+                const isIncome = t.type === 'receita';
+                total += isIncome ? t.amount : -t.amount;
+                const li = document.createElement('li');
+                li.className = "finance-item";
+                li.innerHTML = `
+                    <span class="${isIncome ? 'income' : 'expense'}">${isIncome ? '+' : '-'}${t.amount}g - ${t.description}</span>
+                    <button onclick="deleteFinance(${t.ID})" style="border:none; color:#888;">[x]</button>
                 `;
                 list.appendChild(li);
             });
+
+            const balanceEl = document.getElementById("total-balance") || document.getElementById("balance-container");
+            balanceEl.innerText = total.toLocaleString() + "G";
+            balanceEl.style.color = total >= 0 ? "var(--skyrim-gold)" : "#ff4444";
         }
 
         async function createTask() {
             const title = document.getElementById("task-input").value;
-            if(!title) return;
+            if (!title) return;
             await fetch(`${API_URL}/tasks`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -358,36 +610,11 @@ let token = localStorage.getItem("token");
             loadTasks();
         }
 
-        async function loadFinance() {
-            const res = await fetch(`${API_URL}/finance`, { headers: { "Authorization": `Bearer ${token}` } });
-            const transactions = await res.json();
-            const list = document.getElementById("finance-list");
-            list.innerHTML = "";
-            
-            let total = 0;
-            transactions.forEach(t => {
-                const isIncome = t.type === 'receita';
-                total += isIncome ? t.amount : -t.amount;
-                const li = document.createElement('li');
-                li.className = "finance-item";
-                li.innerHTML = `
-                    <span class="${isIncome ? 'income' : 'expense'}">${isIncome ? '+' : '-'}${t.amount}g - ${t.description}</span>
-                    <button onclick="deleteFinance(${t.ID})" style="border:none; color:#888;">[x]</button>
-                `;
-                list.appendChild(li);
-            });
-            
-            const balanceEl = document.getElementById("total-balance");
-            balanceEl.innerText = total.toLocaleString();
-            balanceEl.style.color = total >= 0 ? "var(--skyrim-gold)" : "#ff4444";
-        }
-
         async function addTransaction() {
             const description = document.getElementById("fin-desc").value;
             const amount = parseFloat(document.getElementById("fin-amount").value);
             const type = document.getElementById("fin-type").value;
-            if(!description || !amount) return;
-
+            if (!description || !amount) return;
             await fetch(`${API_URL}/finance`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -406,4 +633,5 @@ let token = localStorage.getItem("token");
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
+
 </html>
