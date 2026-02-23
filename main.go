@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
-    "gotask-app/handlers"
+	"gotask-app/handlers"
 	"gotask-app/models"
-    "github.com/gin-gonic/gin"
+	"os"
+
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -54,6 +56,11 @@ func main() {
     	authorized.DELETE("/finance/:id", handlers.DeleteTransaction)
 	}
 
-	r.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+    port = "8080" // Porta padrão local
+}
+
+	r.Run(":" + port)
 
 }
