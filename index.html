@@ -149,6 +149,25 @@
     overflow-y: auto;
 }
 
+/* Quando a quest está pronta, ela ganha uma borda verde e fica opaca */
+.task-item.completed { 
+    border-left-color: #4CAF50 !important; 
+    opacity: 0.6; 
+    background: rgba(20, 40, 20, 0.4);
+}
+
+/* O texto riscado */
+.task-text.done { 
+    text-decoration: line-through; 
+    color: #888; 
+}
+
+/* Cursor de "mãozinha" para saber que é clicável */
+.task-text {
+    cursor: pointer;
+    flex: 1;
+}
+
 /* Scrollbar com cara de antigo */
 .rpg-list::-webkit-scrollbar { width: 5px; }
 .rpg-list::-webkit-scrollbar-track { background: #1a1a1a; }
@@ -296,9 +315,16 @@
             (data.tasks || []).forEach(t => {
                 const li = document.createElement('li');
                 li.className = `task-item ${t.done ? 'completed' : ''}`;
+                
+                // Criamos um elemento de "checkbox" estilizado (Pergaminho ou Check)
+                const statusIcon = t.done ? "✅" : "📜";
+
                 li.innerHTML = `
-                    <span class="task-text ${t.done ? 'done' : ''}" onclick="toggleTask(${t.ID}, ${t.done})" style="cursor:pointer">${t.title}</span>
-                    <button onclick="deleteTask(${t.ID})" style="border-color:red; color:red; padding: 2px 8px;">X</button>
+                    <div style="display: flex; align-items: center; flex: 1; cursor: pointer;" onclick="toggleTask(${t.ID}, ${t.done})">
+                        <span style="margin-right: 15px; font-size: 1.2em;">${statusIcon}</span>
+                        <span class="task-text ${t.done ? 'done' : ''}">${t.title}</span>
+                    </div>
+                    <button onclick="deleteTask(${t.ID})" style="border-color:var(--skyrim-red); color:var(--skyrim-red); padding: 2px 8px; font-size: 0.7em;">Banir</button>
                 `;
                 list.appendChild(li);
             });
