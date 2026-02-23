@@ -41,8 +41,6 @@ func main() {
    
 	r.POST("/login", handlers.Login)
 
-
-	// Criamos um grupo protegido
 	authorized := r.Group("/")
 	authorized.Use(handlers.AuthMiddleware()) // <--- O Pedágio está aqui!
 	{
