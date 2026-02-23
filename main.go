@@ -18,6 +18,8 @@ func main() {
     }
 	
 	models.InitDB()
+	// No database.go ou main.go
+	models.DB.AutoMigrate(&models.User{}, &models.Task{}, &models.Transaction{})
 
     r := gin.Default()
 	r.StaticFile("/", "./index.html")
@@ -39,13 +41,17 @@ func main() {
 
 
 	// Criamos um grupo protegido
-	authorized := r.Group("/tasks")
+	authorized := r.Group("/")
 	authorized.Use(handlers.AuthMiddleware()) // <--- O Pedágio está aqui!
 	{
-		authorized.GET("/", handlers.GetTasks)
-		authorized.POST("/", handlers.CreateTask)
-		authorized.PUT("/:id", handlers.UpdateTask)
-		authorized.DELETE("/:id", handlers.DeleteTask)
+		authorized.GET("/tasks", handlers.GetTasks)
+		authorized.POST("/tasks", handlers.CreateTask)
+		authorized.PUT("/tasks/:id", handlers.ToggleTask)
+		authorized.DELETE("/tasks/:id", handlers.DeleteTask)
+		// Rotas de Finanças (Ouro)
+    	authorized.GET("/finance", handlers.GetTransactions)
+    	authorized.POST("/finance", handlers.CreateTransaction)
+    	authorized.DELETE("/finance/:id", handlers.DeleteTransaction)
 	}
 
 	r.Run(":8080")

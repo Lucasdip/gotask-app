@@ -3,339 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyrim Quest Log</title>
+    <title>Skyrim Quest & Inventory Log</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
     <style>
-        /* Variáveis CSS para cores do tema */
         :root {
             --skyrim-gold: #c4ad33;
-            --skyrim-bg: #1a1a1a;
-            --skyrim-panel: #2a2a2a;
+            --skyrim-bg: #0b0c0d;
+            --skyrim-panel: rgba(20, 20, 20, 0.95);
             --skyrim-text: #e0e0e0;
             --skyrim-red: #8b0000;
+            --xp-bar: #4a90e2;
         }
 
         body {
-            background-color: var(--skyrim-bg);
-            background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); /* Textura sutil */
-            color: var(--skyrim-text);
-            font-family: 'MedievalSharp', cursive;
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        h1, h2 {
+            padding: 0;
             font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--skyrim-gold);
-            text-shadow: 2px 2px 4px #000;
-            margin-bottom: 20px;
+            background: var(--skyrim-bg) url('https://4kwallpapers.com/images/walls/thumbs_3t/14834.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--skyrim-text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .quest-log-container {
-            width: 90%;
-            max-width: 600px;
-            background: rgba(42, 42, 42, 0.9);
-            border: 2px solid #444;
-            border-image: linear-gradient(to bottom, #888, #222) 1;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: -1; }
+
+        .container {
+            width: 95%;
+            max-width: 1100px;
+            background: var(--skyrim-panel);
+            border: 2px solid var(--skyrim-gold);
+            padding: 25px;
+            box-shadow: 0 0 30px rgba(0,0,0,1);
         }
 
-        /* Inputs e Botões */
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            background: #111;
-            border: 1px solid #555;
-            color: #fff;
-            padding: 10px;
-            font-family: 'MedievalSharp';
-            margin-bottom: 10px;
+        h1, h2, h3 { color: var(--skyrim-gold); text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+
+        /* Estatísticas do Personagem */
+        .player-stats {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border: 1px solid rgba(196, 173, 51, 0.3);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar-frame {
+            width: 70px; height: 70px; border: 2px solid var(--skyrim-gold);
+            border-radius: 50%; overflow: hidden; background: #000;
+        }
+
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .xp-container { width: 100%; height: 12px; background: #111; border: 1px solid #444; margin-top: 8px; }
+        #xp-fill { height: 100%; background: var(--xp-bar); width: 0%; transition: 0.6s; box-shadow: 0 0 10px var(--xp-bar); }
+
+        /* Layout em Grade para o Dashboard */
+        .dashboard-layout { display: grid; grid-template-columns: 1fr 320px; gap: 30px; }
+
+        /* Estilo de Quests e Finanças */
+        .quest-log, .finance-sidebar { display: flex; flex-direction: column; }
+
+        .task-item, .finance-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--skyrim-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-item.completed { border-left-color: #4CAF50; opacity: 0.6; }
+        .task-text.done { text-decoration: line-through; }
+
+        /* Formulários e Botões */
+        input, select {
+            background: #111; border: 1px solid #555; color: #fff;
+            padding: 10px; font-family: 'MedievalSharp'; margin-bottom: 5px; width: 100%; box-sizing: border-box;
         }
 
         button {
-            background: transparent;
-            color: var(--skyrim-gold);
-            border: 1px solid var(--skyrim-gold);
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-            font-family: 'Cinzel', serif;
-            font-size: 0.9em;
+            background: transparent; color: var(--skyrim-gold); border: 1px solid var(--skyrim-gold);
+            padding: 10px; cursor: pointer; text-transform: uppercase; font-family: 'Cinzel'; transition: 0.3s;
         }
 
-        button:hover {
-            background: var(--skyrim-gold);
-            color: #000;
-            box-shadow: 0 0 10px var(--skyrim-gold);
+        button:hover { background: var(--skyrim-gold); color: #000; }
+
+        .gold-status {
+            font-size: 1.4em; color: #ffd700; text-align: center;
+            padding: 15px; border: 1px dotted var(--skyrim-gold); margin-bottom: 15px;
         }
 
-        .btn-red {
-            color: var(--skyrim-red);
-            border-color: var(--skyrim-red);
-        }
-        .btn-red:hover {
-            background: var(--skyrim-red);
-            color: #fff;
-            box-shadow: 0 0 10px var(--skyrim-red);
-        }
+        /* Container Principal em Grid */
+.rpg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
+    gap: 30px;
+    margin-top: 20px;
+}
 
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 0.8em;
-        }
+/* Painéis Estilo Pedra */
+.panel {
+    background: rgba(30, 30, 30, 0.7);
+    border: 1px solid var(--skyrim-gold);
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+    min-height: 400px;
+}
 
-        /* Seção de Login */
-        #login-section h2 {
-            text-align: center;
-        }
-        #login-section button {
-            width: 100%;
-        }
+/* Ajustes de Input para ficarem elegantes no grid */
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
 
-        /* Seção de Tasks */
-        #task-section {
-            display: none; /* Escondido por padrão, JavaScript mostra */
-        }
-        .header-task-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px;
-        }
-        .user-info {
-            font-size: 0.9em;
-            color: #aaa;
-        }
-        .add-task-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-        .add-task-group input {
-            flex-grow: 1;
-            margin-bottom: 0;
-        }
+.input-group input { flex: 1; }
 
-        /* Lista de Tarefas */
-        .task-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-left: 3px solid transparent;
-            transition: 0.2s;
-            border-bottom: 1px solid #333;
-            background: rgba(0,0,0,0.1);
-            margin-bottom: 5px;
-        }
-        .task-item:hover {
-            border-left: 3px solid var(--skyrim-gold);
-            background: rgba(255,255,255,0.05);
-        }
-        .task-item.completed {
-            border-left-color: #006400; /* Verde escuro para concluídas */
-        }
-        .task-title {
-            font-size: 1.2rem;
-            cursor: pointer; /* Para marcar como concluída */
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        .task-title.done {
-            text-decoration: line-through;
-            color: #666;
-        }
-        .task-actions {
-            display: flex;
-            gap: 5px;
-        }
+.input-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Estilização do Saldo (Ouro) */
+#balance-container {
+    font-size: 1.5rem;
+    color: var(--skyrim-gold);
+    text-align: center;
+    margin: 15px 0;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* Listas com Scroll Personalizado */
+.rpg-list {
+    list-style: none;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Scrollbar com cara de antigo */
+.rpg-list::-webkit-scrollbar { width: 5px; }
+.rpg-list::-webkit-scrollbar-track { background: #1a1a1a; }
+.rpg-list::-webkit-scrollbar-thumb { background: var(--skyrim-gold); }
+
+/* Responsividade: No celular, as colunas ficam uma embaixo da outra */
+@media (max-width: 600px) {
+    .rpg-grid { grid-template-columns: 1fr; }
+}
+
+        .income { color: #4CAF50; }
+        .expense { color: #ff4444; }
+        #login-section { max-width: 400px; margin: auto; }
     </style>
 </head>
 <body>
-    <h1>Skyrim Quest Log</h1>
+    <div class="overlay"></div>
 
-    <div class="quest-log-container">
+    <div class="container">
         <div id="login-section">
-            <h2>Enter the Elder Scrolls</h2>
-            <input type="text" id="username" placeholder="Dragonborn Name">
-            <input type="password" id="password" placeholder="Shout Password">
-            <button onclick="login()">Login</button>
-            <p id="login-error" style="color: var(--skyrim-red); text-align: center; margin-top: 10px;"></p>
+            <h1>Skyrim Log</h1>
+            <input type="text" id="username" placeholder="Nome do Herói">
+            <input type="password" id="password" placeholder="Senha">
+            <button onclick="login()" style="width: 100%">Entrar no Reino</button>
+            <p id="login-error" style="color: red; text-align: center;"></p>
         </div>
 
-        <div id="task-section">
-            <div class="header-task-section">
-                <h2>Your Quests</h2>
-                <div class="user-info">
-                    <span>Logged in as: <strong id="logged-in-user">Guest</strong></span>
-                    <button onclick="logout()" class="btn-small btn-red" style="margin-left: 10px;">Logout</button>
+        <div id="welcome-screen" style="display: none; text-align: center;">
+            <h1>Saudações, <span id="welcome-hero" style="color: var(--skyrim-gold);"></span></h1>
+            <p>O diário de aventuras e o inventário de ouro aguardam.</p>
+            <button onclick="showDashboard()" style="margin-top: 20px; padding: 15px 40px;">Abrir Painel</button>
+        </div>
+
+        <div id="dashboard-screen" style="display: none;">
+            <div class="player-stats">
+                <div class="avatar-frame">
+                    <img id="user-avatar" src="" class="avatar-img">
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span id="display-username" style="color: var(--skyrim-gold); font-weight: bold;"></span>
+                        <span>Nível: <span id="user-level">1</span> - <span id="user-rank">Prisioneiro</span></span>
+                    </div>
+                    <div class="xp-container">
+                        <div id="xp-fill"></div>
+                    </div>
+                </div>
+                <button onclick="logout()" style="font-size: 0.7em; margin-left: 10px;">Sair</button>
+            </div>
+
+            <div class="rpg-grid">
+                <div class="panel quest-panel">
+                    <h3>Diário de Missões</h3>
+                    <div class="input-group">
+                        <input type="text" id="task-input" placeholder="Nova quest...">
+                        <button onclick="createTask()">Aceitar</button>
+                    </div>
+                    <ul id="task-list" class="rpg-list"></ul>
+                </div>
+
+                <div class="panel finance-panel">
+                    <h3>Cofre de Whiterun</h3>
+                    <div class="input-group-vertical">
+                        <input type="text" id="fin-desc" placeholder="Origem do ouro...">
+                        <input type="number" id="fin-amount" placeholder="Quantidade">
+                        <select id="fin-type">
+                            <option value="receita">Saque (+)</option>
+                            <option value="despesa">Tributo (-)</option>
+                        </select>
+                        <button onclick="addTransaction()" class="btn-full">Registrar</button>
+                    </div>
+                    <div id="balance-container">
+                        Saldo: <span id="total-balance">0</span>G
+                    </div>
+                    <ul id="finance-list" class="rpg-list"></ul>
                 </div>
             </div>
-
-            <div class="add-task-group">
-                <input type="text" id="task-title" placeholder="New Quest Title...">
-                <button onclick="createTask()">Add Quest</button>
-            </div>
-
-            <ul id="task-list">
-                </ul>
         </div>
     </div>
 
     <script>
-        // Configurações Globais
-const API_URL = "http://localhost:8080"; 
-let token = localStorage.getItem("token");
-let currentUsername = localStorage.getItem("username");
+        const API_URL = "http://localhost:8080";
+        let token = localStorage.getItem("token");
 
-// --- Inicialização ---
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sistema iniciado. Token atual:", token);
-    if (token && currentUsername) {
-        showTasksSection(currentUsername);
-    } else {
-        showLoginSection();
-    }
-});
-
-// --- Controle de Interface (O "Redirecionamento" SPA) ---
-function showLoginSection() {
-    document.getElementById("login-section").style.display = 'block';
-    document.getElementById("task-section").style.display = 'none';
-}
-
-function showTasksSection(username) {
-    console.log("Trocando para tela de tarefas...");
-    document.getElementById("login-section").style.display = 'none';
-    document.getElementById("task-section").style.display = 'block';
-    document.getElementById("logged-in-user").innerText = username;
-    loadTasks();
-}
-
-// --- Lógica de Autenticação ---
-async function login() {
-    const usernameInput = document.getElementById("username").value;
-    const passwordInput = document.getElementById("password").value;
-    const errorDisplay = document.getElementById("login-error");
-
-    errorDisplay.innerText = ""; 
-
-    try {
-        const res = await fetch(`${API_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: usernameInput, password: passwordInput })
+        document.addEventListener('DOMContentLoaded', () => {
+            if (token) showWelcome(localStorage.getItem("username"));
         });
 
-        const data = await res.json();
+        function showWelcome(username) {
+            document.getElementById("login-section").style.display = 'none';
+            document.getElementById("dashboard-screen").style.display = 'none'; // Garante que o dash tá fechado
+            document.getElementById("welcome-screen").style.display = 'block';
+            document.getElementById("welcome-hero").innerText = username;
+        }
 
-        if (res.ok) {
-            console.log("Resposta da API:", data);
+        function showDashboard() {
+            document.getElementById("welcome-screen").style.display = 'none';
+            document.getElementById("dashboard-screen").style.display = 'block';
+            loadAll();
+        }
+
+        async function login() {
+            const u = document.getElementById("username").value;
+            const p = document.getElementById("password").value;
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("username", u);
+                    token = data.token;
+                    showWelcome(u);
+                } else {
+                    document.getElementById("login-error").innerText = data.error;
+                }
+            } catch (e) {
+                document.getElementById("login-error").innerText = "Reino inacessível (Servidor Offline)";
+            }
+        }
+
+        async function loadAll() {
+            loadTasks();
+            loadFinance();
+        }
+
+        async function loadTasks() {
+            const res = await fetch(`${API_URL}/tasks`, { headers: { "Authorization": `Bearer ${token}` } });
+            if (res.status === 401) return logout();
+            const data = await res.json();
             
-            // Tenta capturar o token independente da capitalização (Token ou token)
-            token = data.token || data.Token; 
-
-            if (!token) {
-                errorDisplay.innerText = "Erro: Token não recebido do servidor.";
-                console.error("Campo 'token' ausente no JSON de resposta.");
-                return;
+            if (data.user) {
+                document.getElementById("display-username").innerText = localStorage.getItem("username");
+                document.getElementById("user-level").innerText = data.user.level;
+                document.getElementById("user-rank").innerText = data.user.rank;
+                document.getElementById("xp-fill").style.width = data.user.xp + "%";
+                document.getElementById("user-avatar").src = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${data.user.username}`;
             }
 
-            localStorage.setItem("token", token);
-            localStorage.setItem("username", usernameInput);
-            
-            showTasksSection(usernameInput);
-        } else {
-            errorDisplay.innerText = data.error || "Credenciais inválidas, Dragonborn.";
+            const list = document.getElementById("task-list");
+            list.innerHTML = "";
+            (data.tasks || []).forEach(t => {
+                const li = document.createElement('li');
+                li.className = `task-item ${t.done ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <span class="task-text ${t.done ? 'done' : ''}" onclick="toggleTask(${t.ID}, ${t.done})" style="cursor:pointer">${t.title}</span>
+                    <button onclick="deleteTask(${t.ID})" style="border-color:red; color:red; padding: 2px 8px;">X</button>
+                `;
+                list.appendChild(li);
+            });
         }
-    } catch (error) {
-        errorDisplay.innerText = "Falha na conexão com o servidor.";
-        console.error("Erro de rede:", error);
-    }
-}
 
-function logout() {
-    localStorage.clear();
-    location.reload(); // Recarrega para limpar todos os estados
-}
+        async function createTask() {
+            const title = document.getElementById("task-input").value;
+            if(!title) return;
+            await fetch(`${API_URL}/tasks`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify({ title, done: false })
+            });
+            document.getElementById("task-input").value = "";
+            loadTasks();
+        }
 
-// --- Lógica de Quests (CRUD) ---
-async function loadTasks() {
-    try {
-        const res = await fetch(`${API_URL}/tasks/`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+        async function toggleTask(id, done) {
+            await fetch(`${API_URL}/tasks/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify({ done: !done })
+            });
+            loadTasks();
+        }
 
-        if (res.status === 401) return logout();
+        async function deleteTask(id) {
+            await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
+            loadTasks();
+        }
 
-        const tasks = await res.json();
-        const taskList = document.getElementById("task-list");
-        taskList.innerHTML = ""; 
+        async function loadFinance() {
+            const res = await fetch(`${API_URL}/finance`, { headers: { "Authorization": `Bearer ${token}` } });
+            const transactions = await res.json();
+            const list = document.getElementById("finance-list");
+            list.innerHTML = "";
+            
+            let total = 0;
+            transactions.forEach(t => {
+                const isIncome = t.type === 'receita';
+                total += isIncome ? t.amount : -t.amount;
+                const li = document.createElement('li');
+                li.className = "finance-item";
+                li.innerHTML = `
+                    <span class="${isIncome ? 'income' : 'expense'}">${isIncome ? '+' : '-'}${t.amount}g - ${t.description}</span>
+                    <button onclick="deleteFinance(${t.ID})" style="border:none; color:#888;">[x]</button>
+                `;
+                list.appendChild(li);
+            });
+            
+            const balanceEl = document.getElementById("total-balance");
+            balanceEl.innerText = total.toLocaleString();
+            balanceEl.style.color = total >= 0 ? "var(--skyrim-gold)" : "#ff4444";
+        }
 
-        tasks.forEach(t => {
-            const listItem = document.createElement('li');
-            listItem.className = `task-item ${t.done ? 'completed' : ''}`;
-            listItem.innerHTML = `
-                <span class="task-title ${t.done ? 'done' : ''}" onclick="toggleTaskStatus(${t.ID}, ${t.done})">
-                    ${t.title}
-                </span>
-                <div class="task-actions">
-                    <button onclick="deleteTask(${t.ID})" class="btn-small btn-red">X</button>
-                </div>
-            `;
-            taskList.appendChild(listItem);
-        });
-    } catch (error) {
-        console.error("Erro ao carregar tarefas:", error);
-    }
-}
+        async function addTransaction() {
+            const description = document.getElementById("fin-desc").value;
+            const amount = parseFloat(document.getElementById("fin-amount").value);
+            const type = document.getElementById("fin-type").value;
+            if(!description || !amount) return;
 
-async function createTask() {
-    const titleInput = document.getElementById("task-title");
-    if (!titleInput.value) return;
+            await fetch(`${API_URL}/finance`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify({ description, amount, type })
+            });
+            document.getElementById("fin-desc").value = "";
+            document.getElementById("fin-amount").value = "";
+            loadFinance();
+        }
 
-    await fetch(`${API_URL}/tasks/`, {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` 
-        },
-        body: JSON.stringify({ title: titleInput.value, done: false })
-    });
-    titleInput.value = "";
-    loadTasks();
-}
+        async function deleteFinance(id) {
+            await fetch(`${API_URL}/finance/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
+            loadFinance();
+        }
 
-async function deleteTask(id) {
-    if (!confirm("Abandonar esta quest?")) return;
-    await fetch(`${API_URL}/tasks/${id}`, {
-        method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
-    });
-    loadTasks();
-}
-
-async function toggleTaskStatus(id, currentStatus) {
-    await fetch(`${API_URL}/tasks/${id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ done: !currentStatus })
-    });
-    loadTasks();
-}
+        function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>

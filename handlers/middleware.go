@@ -34,6 +34,19 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// No seu middleware.go
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+    // Verificamos se a chave existe antes de tentar converter
+    if userIDVal, exists := claims["user_id"]; exists {
+        // O JWT trata números como float64 por padrão
+        c.Set("userID", uint(userIDVal.(float64)))
+    } else {
+        // Se não existir o ID, barramos aqui sem dar Pânico no servidor
+        c.AbortWithStatusJSON(401, gin.H{"error": "Token inválido: ID do herói ausente. Faça login novamente."})
+        return
+    }
+}	
+
 		c.Next()
 	}
 }

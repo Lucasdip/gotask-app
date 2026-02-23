@@ -44,10 +44,11 @@ func Login(c *gin.Context) {
 	}
 
 	// --- GERAÇÃO DO TOKEN ---
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user": user.Username,
-		"exp":  time.Now().Add(time.Hour * 24).Unix(),
-	})
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "user_id":  user.ID,       // <--- ADICIONE ESTA LINHA (Fundamental!)
+        "username": user.Username,
+        "exp":      time.Now().Add(time.Hour * 24).Unix(),
+    })
 
 	// Usamos a função getSecretKey() aqui para garantir que pegamos o valor atualizado
 	tokenString, err := token.SignedString(getSecretKey())
