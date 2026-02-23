@@ -249,9 +249,11 @@
     </div>
 
     <script>
-        const API_URL = window.location.origin; 
-        let token = localStorage.getItem("token");
+        const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://localhost:8080"      // Contexto Local
+        : window.location.origin;     // Contexto de Produção (Monolito)
 
+let token = localStorage.getItem("token");
         document.addEventListener('DOMContentLoaded', () => {
             if (token) showWelcome(localStorage.getItem("username"));
         });
