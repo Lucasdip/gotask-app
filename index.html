@@ -530,8 +530,8 @@
     </div>
 
     <script>
-
-    const BASE_URL = window.location.hostname;
+        // O ponto final indica que o caminho é relativo ao servidor atual
+    const BASE_URL = window.location.origin; 
     const API_URL = `${BASE_URL}/api`;
 
         // --- UI HELPERS ---
