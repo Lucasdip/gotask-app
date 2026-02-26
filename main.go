@@ -38,27 +38,32 @@ func main() {
     c.Next()
 })
 
-   
-	r.POST("/login", handlers.Login)
 
-	authorized := r.Group("/")
-	authorized.Use(handlers.AuthMiddleware()) // <--- O Pedágio está aqui!
-	{
-		authorized.GET("/tasks", handlers.GetTasks)
-		authorized.POST("/tasks", handlers.CreateTask)
-		authorized.PUT("/tasks/:id", handlers.ToggleTask)
-		authorized.DELETE("/tasks/:id", handlers.DeleteTask)
-		// Rotas de Finanças (Ouro)
-    	authorized.GET("/finance", handlers.GetTransactions)
-    	authorized.POST("/finance", handlers.CreateTransaction)
-    	authorized.DELETE("/finance/:id", handlers.DeleteTransaction)
-	}
+    r.POST("/login", handlers.Login)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-    port = "8080" // Porta padrão local
-}
+    authorized := r.Group("/api")
+    authorized.Use(handlers.AuthMiddleware())
+    {
+        // Tasks
+        authorized.GET("/tasks", handlers.GetTasks)
+        authorized.POST("/tasks", handlers.CreateTask)
+        authorized.PUT("/tasks/:id", handlers.ToggleTask)
+        authorized.DELETE("/tasks/:id", handlers.DeleteTask)
+        
+        // Finance
+        authorized.GET("/finance", handlers.GetTransactions)
+        authorized.POST("/finance", handlers.CreateTransaction)
+        authorized.DELETE("/finance/:id", handlers.DeleteTransaction)
+        
+        // Studies
+        authorized.GET("/studies", handlers.GetStudies)
+        authorized.POST("/studies", handlers.CreateStudy)
+        authorized.DELETE("/studies/:id", handlers.DeleteStudy)
+    }
 
-	r.Run(":" + port)
+    port := os.Getenv("PORT")
+    if port == "" { port = "8080" }
 
+    fmt.Println("Servidor rodando na porta", port)
+    r.Run(":" + port)
 }

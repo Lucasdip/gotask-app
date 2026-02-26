@@ -24,13 +24,10 @@ func InitDB() {
 		panic(err)
 	}
 
-	// O AutoMigrate agora criará as tabelas no Postgres do Neon
-	database.AutoMigrate(&Task{})
-    // No futuro, adicionaremos aqui: database.AutoMigrate(&Credential{}, &Note{})
 
 	DB = database
 	
-	DB.AutoMigrate(&User{}, &Task{}) 
+	DB.AutoMigrate(&User{}, &Task{}, (&Study{}))
     
     fmt.Println("O banco de dados foi sincronizado!")
 }
