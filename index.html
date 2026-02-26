@@ -531,9 +531,7 @@
 
     <script>
 
-        const BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-            ? "http://localhost:8080"
-            : "https://gotask-app.onrender.com/"; // Substitua pela sua URL real do Render
+        const BASE_URL = "/";
 
         const API_URL = `${BASE_URL}/api`;
         let token = localStorage.getItem("token");
