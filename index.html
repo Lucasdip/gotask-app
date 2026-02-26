@@ -531,16 +531,13 @@
 
     <script>
 
-        const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-            ? "http://localhost:8080" : window.location.origin;
+        const BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+            ? "http://localhost:8080"
+            : "https://gotask-app.onrender.com/"; // Substitua pela sua URL real do Render
 
+        const API_URL = `${BASE_URL}/api`;
         let token = localStorage.getItem("token");
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (token) {
-                showWelcome(localStorage.getItem("username"));
-            }
-        });
+        let focosTemporarios = [];
 
         // --- UI HELPERS ---
         function showSection(id) {
